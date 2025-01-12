@@ -352,3 +352,97 @@ hilos como sucede con el Hyper-Threading o SMT.
 
 Finalmente, con las características de tu PC, que tiene 4 núcleos físicos y 8 procesadores lógicos (gracias a
 Hyper-Threading o SMT), en efecto, podrías aprovechar tanto paralelismo verdadero como ejecución intercalada.
+
+## Creando hilos implementando la interface Runnable
+
+Creamos una clase que implemente la interfaz `Runnable`. Luego definimos la lógica dentro del método `run()` donde
+vamos a ir imprimiendo valores y luego pausando el hilo durante un tiempo aleatorio.
+
+````java
+
+@Slf4j
+@Getter
+@RequiredArgsConstructor
+public class TaskRunnable implements Runnable {
+
+    private final String name;
+
+    @Override
+    public void run() {
+        log.info("Inicia el hilo \"{}\"", this.name);
+
+        IntStream.range(0, 10)
+                .forEach(index -> {
+                    log.info("{}, {}", index, this.name);
+                    try {
+                        Thread.sleep((long) (Math.random() * 1000));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+        log.info("Finaliza el hilo \"{}\"", this.name);
+    }
+}
+````
+
+Creamos la clase principal donde ejecutaremos la clase anterior. Hemos creado 3 hilos y a cada hilo le he asignado un
+nombre, además ese mismo nombre se lo paso a la clase `TaskRunnable` para poder mostrarlo en el mensaje.
+
+````java
+public class TaskMain {
+    public static void main(String[] args) {
+        Thread t1 = new Thread(new TaskRunnable("Spring"), "Spring");
+        t1.start();
+
+        Thread t2 = new Thread(new TaskRunnable("Docker"), "Docker");
+        t2.start();
+
+        Thread t3 = new Thread(new TaskRunnable("Angulr"), "Angulr");
+        t3.start();
+    }
+}
+````
+
+Luego de ejecutar la clase anterior vemos que se van ejecutando en paralelo los tres hilos y se establece como una
+especie de competencia por ver cuál es el que finaliza primero, esto debido a la pausa aleatoria que pusimos en la
+iteración.
+
+````bash
+12:54:03.006 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- Inicia el hilo "Angulr"
+12:54:03.006 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- Inicia el hilo "Spring"
+12:54:03.006 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- Inicia el hilo "Docker"
+12:54:03.014 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 0, Angulr
+12:54:03.014 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 0, Spring
+12:54:03.014 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 0, Docker
+12:54:03.207 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 1, Docker
+12:54:03.234 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 2, Docker
+12:54:03.278 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 1, Spring
+12:54:03.583 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 2, Spring
+12:54:03.945 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 1, Angulr
+12:54:04.007 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 3, Docker
+12:54:04.008 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 3, Spring
+12:54:04.110 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 4, Spring
+12:54:04.450 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 2, Angulr
+12:54:04.572 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 5, Spring
+12:54:04.654 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 4, Docker
+12:54:04.770 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 3, Angulr
+12:54:05.266 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 4, Angulr
+12:54:05.324 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 6, Spring
+12:54:05.332 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 5, Docker
+12:54:05.482 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 6, Docker
+12:54:05.657 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 7, Docker
+12:54:05.745 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 5, Angulr
+12:54:06.075 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 6, Angulr
+12:54:06.076 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 7, Spring
+12:54:06.326 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 8, Docker
+12:54:06.442 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 8, Spring
+12:54:06.451 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- 9, Spring
+12:54:06.864 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 7, Angulr
+12:54:07.137 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- 9, Docker
+12:54:07.214 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnable -- Finaliza el hilo "Spring"
+12:54:07.761 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnable -- Finaliza el hilo "Docker"
+12:54:07.833 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 8, Angulr
+12:54:08.768 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 9, Angulr
+12:54:09.204 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- Finaliza el hilo "Angulr"
+````
