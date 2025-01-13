@@ -446,3 +446,85 @@ iteración.
 12:54:08.768 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- 9, Angulr
 12:54:09.204 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnable -- Finaliza el hilo "Angulr"
 ````
+
+## Implementa hilos con expresiones lambda y Runnable
+
+En la clase anterior implementamos la interfaz `Runnable`, pero en esta nueva sección, haremos la implementación
+utilizando expresiones lambda o función anónima.``
+
+````java
+
+@Slf4j
+public class TaskRunnableLambda {
+    public static void main(String[] args) {
+        Thread t1 = new Thread(runnable(), "Spring");
+        t1.start();
+
+        Thread t2 = new Thread(runnable(), "Docker");
+        t2.start();
+
+        Thread t3 = new Thread(runnable(), "Angulr");
+        t3.start();
+    }
+
+    private static Runnable runnable() {
+        return () -> {
+            log.info("Inicia el hilo \"{}\"", Thread.currentThread().getName());
+
+            IntStream.range(0, 10)
+                    .forEach(index -> {
+                        log.info("{}, {}", index, Thread.currentThread().getName());
+                        try {
+                            Thread.sleep((long) (Math.random() * 1000));
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+            log.info("Finaliza el hilo \"{}\"", Thread.currentThread().getName());
+        };
+    }
+}
+````
+
+Si ejecutamos la clase anterior veremos que todo sigue funcionando igual, pero esta vez hemos realizado la
+implementación del Runnable usando una expresión lambda.
+
+````bash
+09:55:00.500 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Docker"
+09:55:00.500 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Spring"
+09:55:00.500 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Angulr"
+09:55:00.510 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Spring
+09:55:00.511 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Docker
+09:55:00.545 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Angulr
+09:55:00.588 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Docker
+09:55:01.149 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Spring
+09:55:01.161 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Angulr
+09:55:01.175 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Docker
+09:55:01.754 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Spring
+09:55:02.050 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Angulr
+09:55:02.142 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Docker
+09:55:02.155 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Spring
+09:55:02.418 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Docker
+09:55:02.429 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Spring
+09:55:02.801 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Angulr
+09:55:02.910 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Angulr
+09:55:03.203 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Docker
+09:55:03.398 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Spring
+09:55:03.564 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Angulr
+09:55:03.981 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Docker
+09:55:04.006 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Angulr
+09:55:04.017 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Docker
+09:55:04.107 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Docker
+09:55:04.151 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Angulr
+09:55:04.272 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Spring
+09:55:04.514 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Docker
+09:55:04.644 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Angulr
+09:55:05.155 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Spring
+09:55:05.155 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Angulr
+09:55:05.204 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Docker"
+09:55:05.372 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Spring
+09:55:05.669 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Angulr"
+09:55:05.793 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Spring
+09:55:06.738 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Spring"
+````
