@@ -99,7 +99,7 @@ public class Main {
 ````java
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Thread t1 = Thread.currentThread();
+        Thread t1 = Thread.currentThread(); //Obtenemos el hilo principal
         Thread t2 = new Thread(() -> {
             //realizando alguna tarea costosa
             try {
@@ -109,7 +109,7 @@ public class Main {
             }
         });
         t2.start();
-        t2.join();
+        t2.join();//Espera a que este hilo finalice
     }
 }
 ````
@@ -528,3 +528,109 @@ implementación del Runnable usando una expresión lambda.
 09:55:05.793 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Spring
 09:55:06.738 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Spring"
 ````
+
+## El método join vs sleep
+
+El método `.join()` en Java es parte de la clase `Thread` y se utiliza para que un hilo principal espere a que un hilo
+secundario termine su ejecución antes de continuar. Es especialmente útil cuando deseas asegurarte de que un hilo ha
+completado su tarea antes de proceder con el resto del código.
+
+````java
+
+@Slf4j
+public class TaskRunnableLambda {
+    public static void main(String[] args) throws InterruptedException {
+        Thread main = Thread.currentThread();
+
+        Thread t1 = new Thread(runnable(), "Spring");
+        t1.start();
+
+        Thread t2 = new Thread(runnable(), "Docker");
+        t2.start();
+
+        Thread t3 = new Thread(runnable(), "Angulr");
+        t3.start();
+
+        t1.join(); //El hilo principal espera a que t1 termine
+        t2.join(); //El hilo principal espera a que t2 termine
+        t3.join(); //El hilo principal espera a que t3 termine
+
+        log.info("Continúa con la ejecución del método main: " + main.getName());
+    }
+
+    private static Runnable runnable() {
+        return () -> { /* code */ };
+    }
+}
+````
+
+### Descripción
+
+- Cuando llamas a `my_thread.join()` en un hilo, el hilo que realiza la llamada (el hilo actual) queda bloqueado hasta
+  que el hilo especificado (`my_thread`) termina.
+- Si el hilo ya ha terminado en el momento en que se llama a `.join()`, la llamada regresa inmediatamente.
+
+### Sobrecargas del método
+
+El método `.join()` tiene tres versiones principales:
+
+1. `void join()`, espera indefinidamente hasta que el hilo termine.
+2. `void join(long millis)`, espera como máximo millis milisegundos para que el hilo termine.
+3. `void join(long millis, int nanos)`, espera como máximo el tiempo especificado en milisegundos y nanosegundos para
+   que el hilo termine.
+
+Si ejecutamos la aplicación veremos que el mensaje se imprime siempre al final.
+
+````bash
+12:03:11.145 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Spring"
+12:03:11.145 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Docker"
+12:03:11.145 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Inicia el hilo "Angulr"
+12:03:11.153 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Spring
+12:03:11.153 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Docker
+12:03:11.153 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 0, Angulr
+12:03:11.680 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Docker
+12:03:11.803 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Angulr
+12:03:11.847 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 1, Spring
+12:03:12.179 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Angulr
+12:03:12.495 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Spring
+12:03:12.513 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 2, Docker
+12:03:12.747 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Docker
+12:03:12.855 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Angulr
+12:03:12.964 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Docker
+12:03:13.183 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 3, Spring
+12:03:13.395 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Spring
+12:03:13.466 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 4, Angulr
+12:03:13.808 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Docker
+12:03:14.238 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Spring
+12:03:14.301 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 5, Angulr
+12:03:14.358 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Spring
+12:03:14.400 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Docker
+12:03:14.401 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 6, Angulr
+12:03:14.699 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Spring
+12:03:14.731 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Spring
+12:03:15.078 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Angulr
+12:03:15.288 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 7, Docker
+12:03:15.590 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Spring
+12:03:15.661 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Angulr
+12:03:16.087 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 8, Docker
+12:03:16.216 [Spring] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Spring"
+12:03:16.268 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Angulr
+12:03:16.568 [Angulr] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Angulr"
+12:03:16.888 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- 9, Docker
+12:03:17.266 [Docker] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Finaliza el hilo "Docker"
+12:03:17.266 [main] INFO dev.magadiflo.app.runnable.TaskRunnableLambda -- Continúa con la ejecución del método main: main
+````
+
+### Diferencia entre join vs sleep
+
+La diferencia principal entre `Thread.sleep()` y `Thread.join()` radica en su propósito:
+
+- `Thread.sleep(millis)`: Pausa el hilo actual durante el tiempo especificado, pero no espera a que ningún otro hilo
+  termine. Simplemente, detiene la ejecución del hilo actual.
+
+- `Thread.join()`: Hace que el hilo actual espere a que otro hilo específico complete su ejecución antes de continuar.
+
+En resumen:
+
+- `sleep()` = pausa del hilo actual.
+- `join()` = espera por otro hilo.

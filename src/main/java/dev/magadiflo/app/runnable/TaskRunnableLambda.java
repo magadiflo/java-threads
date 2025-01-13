@@ -6,7 +6,9 @@ import java.util.stream.IntStream;
 
 @Slf4j
 public class TaskRunnableLambda {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+        Thread main = Thread.currentThread();
+
         Thread t1 = new Thread(runnable(), "Spring");
         t1.start();
 
@@ -15,6 +17,12 @@ public class TaskRunnableLambda {
 
         Thread t3 = new Thread(runnable(), "Angulr");
         t3.start();
+
+        t1.join(); //El hilo principal espera a que t1 termine
+        t2.join(); //El hilo principal espera a que t2 termine
+        t3.join(); //El hilo principal espera a que t3 termine
+
+        log.info("Continúa con la ejecución del método main: " + main.getName());
     }
 
     private static Runnable runnable() {
